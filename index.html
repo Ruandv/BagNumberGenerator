@@ -1,0 +1,140 @@
+<html>
+
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+        crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp"
+        crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+        crossorigin="anonymous"></script>
+<style type="css">
+@media (max-width: 767px) {
+  .btn {
+    display: block;
+    width: 100%;
+  }
+}
+
+.input-lg {
+  font-size: 32px;
+  font-weight:strong;
+}
+</style>
+</head>
+<script>
+
+    $(document).ready(function () {
+		
+        var prefix = 0000;
+		var bagLength = 10;
+        // Equivalent event setup using the `.on()` method
+        $("div.btn").on("click", function () {
+            var txt = this.innerHTML;
+            switch (txt) {
+                case "SDM 100 H":
+                    prefix = 75526;
+					bagLength = 14;
+                    break;
+				case "SDM 100 C":
+					prefix = 75626;
+					bagLength = 14;
+					break;
+                default:
+                    prefix = 1999;
+                    break;
+
+            }
+	 
+			var maxValue = (Math.pow(10,(bagLength - prefix.toString().length))/10)*9
+			var minValue = maxValue/9;
+			
+            var data = Math.round((Math.random(maxValue)) * minValue);
+            var result = luhn_caclulate(prefix.toString() + data.toString());
+			
+            while ((prefix.toString().length + data.toString().length + result.toString().length) < bagLength) {
+                data = Math.round((Math.random(maxValue)) * minValue);
+                result = luhn_caclulate(prefix.toString() + data.toString());
+            }
+            
+            var elem = $("input");
+			console.log(prefix.toString() +"-"+ data.toString()+"-"+ result.toString())
+            elem[0].value = prefix.toString() +"-"+ data.toString().substring(0, data.toString().length/2) +"-"+ data.toString().substring((data.toString().length/2)) +"-"+ result.toString();
+			
+			/* Copy the text inside the text field */
+			var copyText = elem[0];
+
+			/* Select the text field */
+			copyText.select();	 
+			document.execCommand("copy");
+			writeMessage("Copied " + txt + " : " + copyText.value);
+			/* Alert the copied text */
+			
+        });
+    });
+
+	function writeMessage(message){
+		var currentDate = new Date();
+		var messageLabel = $(".messages").append("<p>["+ currentDate.toLocaleTimeString() + "] " + message+ "</p>");
+	}
+
+    /*
+* JavaScript implementation of the Luhn algorithm, with calculation and validation functions
+*/
+
+    /* luhn_checksum
+     * Implement the Luhn algorithm to calculate the Luhn check digit.
+     * Return the check digit.
+     */
+    function luhn_checksum(code) {
+        var len = code.length
+        var parity = len % 2
+        var sum = 0
+        for (var i = len - 1; i >= 0; i--) {
+            var d = parseInt(code.charAt(i))
+            if (i % 2 == parity) { d *= 2 }
+            if (d > 9) { d -= 9 }
+            sum += d
+        }
+        return sum % 10
+    }
+
+    /* luhn_caclulate
+     * Return a full code (including check digit), from the specified partial code (without check digit).
+     */
+    function luhn_caclulate(partcode) {
+        var checksum = luhn_checksum(partcode + "0")
+        return checksum == 0 ? 0 : 10 - checksum
+    }
+
+    /* luhn_validate
+     * Return true if specified code (with check digit) is valid.
+     */
+    function luhn_validate(fullcode) {
+        return luhn_checksum(fullcode) == 0
+    }
+</script>
+
+<body >
+<div class="container">
+	<div class="row">&nbsp</div>
+    <div class="form-group">
+        <div class="btn btn-lg btn-warning">SDM 100 H</div>
+		<div class="btn btn-lg btn-warning">SDM 100 C</div>
+        <div class="btn btn-lg btn-primary pull-right">SDM 500</div>
+    </div>
+    <div class="form-group">
+        <input type="text" class="form-control input-lg" name="control">
+    </div>
+	<div class="messages">
+		
+	</div>
+	</div>
+</body>
+
+</html>
